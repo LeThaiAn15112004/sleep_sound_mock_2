@@ -6,13 +6,15 @@ public class Sound {
     private String fileName;
     private String icon;
     private int volume;
+    private boolean isPlaying;
 
-    public Sound(int id, String name, String fileName, String icon, int volume) {
+    public Sound(int id, String name, String fileName, String icon, int volume, boolean isPlaying) {
         this.id = id;
         this.name = name;
         this.fileName = fileName;
         this.icon = icon;
         this.volume = volume;
+        this.isPlaying = isPlaying;
     }
 
     // Getter và Setter
@@ -56,6 +58,14 @@ public class Sound {
         this.volume = volume;
     }
 
+    public boolean isPlaying() {
+        return isPlaying;
+    }
+
+    public void setPlaying(boolean playing) {
+        isPlaying = playing;
+    }
+
     @Override
     public String toString() {
         return "Sound{" +
@@ -64,6 +74,7 @@ public class Sound {
                 ", fileName='" + fileName + '\'' +
                 ", icon='" + icon + '\'' +
                 ", volume=" + volume +
+                ", isPlaying=" + isPlaying +
                 '}';
     }
 }

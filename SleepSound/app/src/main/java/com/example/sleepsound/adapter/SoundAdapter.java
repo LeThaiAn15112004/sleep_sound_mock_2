@@ -2,17 +2,14 @@ package com.example.sleepsound.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.sleepsound.R;
+import com.example.sleepsound.databinding.ItemAmbienceBinding;
 import com.example.sleepsound.model.Sound;
 
 import java.util.List;
@@ -20,43 +17,48 @@ import java.util.List;
 public class SoundAdapter extends RecyclerView.Adapter<SoundAdapter.SoundViewHolder> {
     private Context context;
     private List<Sound> soundList;
+    private OnItemClickListener onItemClickListener;
 
     public SoundAdapter(Context context, List<Sound> soundList) {
         this.context = context;
         this.soundList = soundList;
     }
 
+    public Context getContext() {
+        return context;
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+    public List<Sound> getSoundList() {
+        return soundList;
+    }
+
+    public void setSoundList(List<Sound> soundList) {
+        this.soundList = soundList;
+    }
+
+    public OnItemClickListener getOnItemClickListener() {
+        return onItemClickListener;
+    }
+
     @NonNull
     @Override
     public SoundViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_ambience, parent, false);
-        return new SoundViewHolder(view);
+        ItemAmbienceBinding binding = ItemAmbienceBinding.inflate(LayoutInflater.from(context), parent, false);
+        return new SoundViewHolder(binding);
     }
 
     @Override
     public void onBindViewHolder(@NonNull SoundViewHolder holder, int position) {
         Sound sound = soundList.get(position);
-        try {
-            // Loại bỏ phần mở rộng nếu có
-            String resourceName = sound.getIcon().replace(".svg", "");
+        holder.bind(sound, onItemClickListener);
+    }
 
-            // Lấy ID của tài nguyên drawable
-            int resId = context.getResources().getIdentifier(resourceName, "drawable", context.getPackageName());
-
-            // Kiểm tra và đặt ảnh
-            if (resId != 0) {
-                holder.imageBg.setImageResource(resId);
-            } else {
-                // Hình ảnh mặc định khi không tìm thấy tài nguyên
-                holder.imageBg.setImageResource(R.drawable.ic_launcher_foreground);
-            }
-
-            // Đặt tên âm thanh
-            holder.soundName.setText(sound.getName());
-        } catch (Exception e) {
-            Toast.makeText(context.getApplicationContext(), "Something went wrong, please try again later", Toast.LENGTH_SHORT).show();
-            System.err.println(e);
-        }
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
     }
 
     @Override
@@ -64,14 +66,49 @@ public class SoundAdapter extends RecyclerView.Adapter<SoundAdapter.SoundViewHol
         return soundList.size();
     }
 
-    public static class SoundViewHolder extends RecyclerView.ViewHolder {
-        ImageView imageBg;
-        TextView soundName;
+    public interface OnItemClickListener {
+        void onItemClick(int pos);
+    }
 
-        public SoundViewHolder(@NonNull View itemView) {
-            super(itemView);
-            imageBg = itemView.findViewById(R.id.image_bg_ambience);
-            soundName = itemView.findViewById(R.id.text_sound_name);
+    public static class SoundViewHolder extends RecyclerView.ViewHolder {
+        private final ItemAmbienceBinding binding;
+
+        public SoundViewHolder(@NonNull ItemAmbienceBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+        }
+
+        public void bind(Sound sound, OnItemClickListener onItemClickListener) {
+            try {
+                // Set icon image
+                String resourceName = sound.getIcon().replace(".svg", "");
+                int resId = binding.getRoot().getContext().getResources()
+                        .getIdentifier(resourceName, "drawable", binding.getRoot().getContext().getPackageName());
+                if (resId != 0) {
+                    binding.imageBgAmbience.setImageResource(resId);
+                } else {
+                    binding.imageBgAmbience.setImageResource(R.drawable.ic_launcher_foreground);
+                }
+
+                if (sound.isPlaying()) {
+                    binding.imageBgAmbience.setBackgroundResource(R.color.purple);
+                } else {
+                    binding.imageBgAmbience.setBackgroundResource(R.color.blue_dark);
+                }
+
+                // Set sound name
+                binding.textSoundName.setText(sound.getName());
+
+                // Set click listener
+                binding.getRoot().setOnClickListener(v -> {
+                    if (onItemClickListener != null) {
+                        onItemClickListener.onItemClick(getAdapterPosition());
+                    }
+                });
+            } catch (Exception e) {
+                Toast.makeText(binding.getRoot().getContext(), "Something went wrong, please try again later", Toast.LENGTH_SHORT).show();
+                System.err.println(e);
+            }
         }
     }
 }
