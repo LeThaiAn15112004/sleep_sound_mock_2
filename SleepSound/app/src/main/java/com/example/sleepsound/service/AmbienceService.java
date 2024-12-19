@@ -15,6 +15,8 @@ import java.util.Map;
 public class AmbienceService extends Service {
     public static final String PLAY_SOUND_ACTION = "PLAY_SOUND_ACTION";
     public static final String STOP_SOUND_ACTION = "STOP_SOUND_ACTION";
+    public static final String STOP_ALL_SOUNDS_ACTION = "STOP_ALL_SOUNDS_ACTION";
+    public static final String UPDATE_VOLUME_ACTION = "UPDATE_VOLUME_ACTION";
     public Map<Integer, MediaPlayer> mediaPlayerMap; // Lưu trữ các MediaPlayer instance theo resId
 
     @Override
@@ -33,7 +35,12 @@ public class AmbienceService extends Service {
                     playSound(resId);
                 } else if (STOP_SOUND_ACTION.equals(action)) {
                     stopSound(resId);
+                } else if (UPDATE_VOLUME_ACTION.equals(action)){
+                    int volume = intent.getIntExtra("volume", 50);
+                    updateVolume(resId, volume);
                 }
+            } else if (STOP_ALL_SOUNDS_ACTION.equals(action)) {
+                onDestroy();
             }
         }
         return START_STICKY;
@@ -45,6 +52,7 @@ public class AmbienceService extends Service {
             try {
                 MediaPlayer mediaPlayer = MediaPlayer.create(this, resId);
                 if (mediaPlayer != null) {
+                    mediaPlayer.setLooping(true);
                     mediaPlayer.start();
                     mediaPlayer.setOnCompletionListener(mp -> {
                         stopSound(resId); // Tự động dừng khi phát xong
@@ -66,7 +74,15 @@ public class AmbienceService extends Service {
         if (mediaPlayer != null) {
             mediaPlayer.stop();
             mediaPlayer.release();
-            mediaPlayerMap.remove(resId); // Xóa khỏi Map
+            mediaPlayerMap.remove(resId); // Delete from map
+        }
+    }
+
+    private void updateVolume(int resId, int volume) {
+        MediaPlayer mediaPlayer = mediaPlayerMap.get(resId);
+        if (mediaPlayer != null) {
+            float volumeLevel = volume / 100f;
+            mediaPlayer.setVolume(volumeLevel, volumeLevel);
         }
     }
 

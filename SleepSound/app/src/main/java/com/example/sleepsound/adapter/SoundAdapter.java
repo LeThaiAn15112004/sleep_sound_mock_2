@@ -30,6 +30,7 @@ public class SoundAdapter extends RecyclerView.Adapter<SoundAdapter.SoundViewHol
 
     public void setContext(Context context) {
         this.context = context;
+        notifyDataSetChanged();
     }
 
     public List<Sound> getSoundList() {
@@ -38,6 +39,7 @@ public class SoundAdapter extends RecyclerView.Adapter<SoundAdapter.SoundViewHol
 
     public void setSoundList(List<Sound> soundList) {
         this.soundList = soundList;
+        notifyDataSetChanged();
     }
 
     public OnItemClickListener getOnItemClickListener() {
@@ -71,42 +73,42 @@ public class SoundAdapter extends RecyclerView.Adapter<SoundAdapter.SoundViewHol
     }
 
     public static class SoundViewHolder extends RecyclerView.ViewHolder {
-        private final ItemAmbienceBinding binding;
+        private final ItemAmbienceBinding itemAmbienceBinding;
 
-        public SoundViewHolder(@NonNull ItemAmbienceBinding binding) {
-            super(binding.getRoot());
-            this.binding = binding;
+        public SoundViewHolder(@NonNull ItemAmbienceBinding itemAmbienceBinding) {
+            super(itemAmbienceBinding.getRoot());
+            this.itemAmbienceBinding = itemAmbienceBinding;
         }
 
         public void bind(Sound sound, OnItemClickListener onItemClickListener) {
             try {
                 // Set icon image
                 String resourceName = sound.getIcon().replace(".svg", "");
-                int resId = binding.getRoot().getContext().getResources()
-                        .getIdentifier(resourceName, "drawable", binding.getRoot().getContext().getPackageName());
+                int resId = itemAmbienceBinding.getRoot().getContext().getResources()
+                        .getIdentifier(resourceName, "drawable", itemAmbienceBinding.getRoot().getContext().getPackageName());
                 if (resId != 0) {
-                    binding.imageBgAmbience.setImageResource(resId);
+                    itemAmbienceBinding.imageBgAmbience.setImageResource(resId);
                 } else {
-                    binding.imageBgAmbience.setImageResource(R.drawable.ic_launcher_foreground);
+                    itemAmbienceBinding.imageBgAmbience.setImageResource(R.drawable.ic_launcher_foreground);
                 }
 
                 if (sound.isPlaying()) {
-                    binding.imageBgAmbience.setBackgroundResource(R.color.purple);
+                    itemAmbienceBinding.imageBgAmbience.setBackgroundResource(R.color.purple);
                 } else {
-                    binding.imageBgAmbience.setBackgroundResource(R.color.blue_dark);
+                    itemAmbienceBinding.imageBgAmbience.setBackgroundResource(R.color.blue_dark);
                 }
 
                 // Set sound name
-                binding.textSoundName.setText(sound.getName());
+                itemAmbienceBinding.textSoundName.setText(sound.getName());
 
                 // Set click listener
-                binding.getRoot().setOnClickListener(v -> {
+                itemAmbienceBinding.getRoot().setOnClickListener(v -> {
                     if (onItemClickListener != null) {
                         onItemClickListener.onItemClick(getAdapterPosition());
                     }
                 });
             } catch (Exception e) {
-                Toast.makeText(binding.getRoot().getContext(), "Something went wrong, please try again later", Toast.LENGTH_SHORT).show();
+                Toast.makeText(itemAmbienceBinding.getRoot().getContext(), "Something went wrong, please try again later", Toast.LENGTH_SHORT).show();
                 System.err.println(e);
             }
         }

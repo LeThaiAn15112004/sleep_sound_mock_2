@@ -9,8 +9,8 @@
     card_view:cardElevation="4dp">
 
     <RelativeLayout
-        android:layout_width="115dp"
-        android:layout_height="160dp"
+        android:layout_width="100dp"
+        android:layout_height="150dp"
         android:background="@drawable/background_tab_music"
         android:padding="10dp">
 
