@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -14,7 +17,12 @@
         tools:targetApi="31">
         <service android:name=".service.AmbienceService"
             android:enabled="true"
-            android:exported="true"/>
+            android:exported="true"
+            android:permission="android.permission.BIND_MEDIA_SESSION"/>
+        <service android:name=".service.ReminderService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.BIND_MEDIA_SESSION"/>
         <activity
             android:name=".activity.MainActivity"
             android:exported="true">

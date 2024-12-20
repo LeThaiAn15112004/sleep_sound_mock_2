@@ -52,30 +52,6 @@ public class ViewPagerAmbienceAdapter extends RecyclerView.Adapter<ViewPagerAmbi
         holder.binding.recyclerView.setAdapter(soundAdapter);
         soundAdapter.setSoundList(sounds);
         soundAdapter.notifyDataSetChanged();
-//
-//        // Thiết lập RecyclerView trong từng trang của ViewPager
-//        StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.HORIZONTAL);
-//        holder.binding.recyclerView.setLayoutManager(layoutManager);
-//        SoundAdapter soundAdapter = new SoundAdapter(context, sounds);
-//        holder.binding.recyclerView.setAdapter(soundAdapter);
-//        soundAdapter.setOnItemClickListener(new SoundAdapter.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(int pos) {
-//                try{
-//                    Sound clickedSound = soundAdapter.getSoundList().get(pos);
-//                    String soundFileName = clickedSound.getFileName();
-//                    int resId = ambienceFragmentViewModel.getResIdSong(soundFileName, context);
-//                    soundAdapter.notifyDataSetChanged();
-//                    ambienceFragmentViewModel.toggleSound(clickedSound, context);
-//                    Intent intent = ambienceFragmentViewModel.createPlaySoundIntent(resId);
-//                    intent.setClass(context, AmbienceService.class);
-//                    context.startService(intent);
-//                }catch (Exception e){
-//                    Toast.makeText(context, "Something went wrong, please try again later", Toast.LENGTH_SHORT).show();
-//                    System.err.println(e.getMessage());
-//                }
-//            }
-//        });
     }
 
     @Override

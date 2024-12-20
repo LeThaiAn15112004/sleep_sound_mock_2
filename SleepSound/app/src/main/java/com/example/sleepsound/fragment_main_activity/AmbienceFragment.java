@@ -10,7 +10,6 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.util.Log;
@@ -31,7 +30,6 @@ import com.example.sleepsound.model.Sound;
 import com.example.sleepsound.service.AmbienceService;
 import com.example.sleepsound.shared_preferences.MySharedPreferences;
 import com.example.sleepsound.viewmodel.AmbienceFragmentViewModel;
-import com.example.sleepsound.viewpager.ViewPagerAdapter;
 import com.example.sleepsound.viewpager.ViewPagerAmbienceAdapter;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.tabs.TabLayout;
@@ -67,7 +65,6 @@ public class AmbienceFragment extends Fragment implements
 
     private void initialize() {
         try {
-
             ambienceFragmentViewModel = new ViewModelProvider(requireActivity()).get(AmbienceFragmentViewModel.class);
             ambienceFragmentViewModel.setMySharedPreferences(mySharedPreferences);
             ambienceFragmentViewModel.updateFormattedStopTime();
@@ -203,13 +200,13 @@ public class AmbienceFragment extends Fragment implements
         DialogTimePickerBinding dialogTimePickerBinding = DialogTimePickerBinding.inflate(getLayoutInflater());
         bottomTimerDialog.setContentView(dialogTimePickerBinding.getRoot());
 
-        setupNumberPicker(dialogTimePickerBinding.hourPicker, 23);
-        setupNumberPicker(dialogTimePickerBinding.minutePicker, 59);
-        setupNumberPicker(dialogTimePickerBinding.secondPicker, 59);
+        ambienceFragmentViewModel.setupNumberPicker(dialogTimePickerBinding.hourPicker, 23);
+        ambienceFragmentViewModel.setupNumberPicker(dialogTimePickerBinding.minutePicker, 59);
+        ambienceFragmentViewModel.setupNumberPicker(dialogTimePickerBinding.secondPicker, 59);
 
-        dialogTimePickerBinding.hourPicker.setValue(mySharedPreferences.getIntValue("hourStopSound"));
-        dialogTimePickerBinding.minutePicker.setValue(mySharedPreferences.getIntValue("minuteStopSound"));
-        dialogTimePickerBinding.secondPicker.setValue(mySharedPreferences.getIntValue("secondStopSound"));
+        dialogTimePickerBinding.hourPicker.setValue(mySharedPreferences.getIntValue("hourStopSound", 0));
+        dialogTimePickerBinding.minutePicker.setValue(mySharedPreferences.getIntValue("minuteStopSound", 0));
+        dialogTimePickerBinding.secondPicker.setValue(mySharedPreferences.getIntValue("secondStopSound", 0));
 
         dialogTimePickerBinding.btnDone.setOnClickListener(v -> {
             int hour = dialogTimePickerBinding.hourPicker.getValue();
@@ -222,44 +219,6 @@ public class AmbienceFragment extends Fragment implements
         });
 
         bottomTimerDialog.show();
-    }
-
-    @SuppressLint("DefaultLocale")
-    private void setupNumberPicker(NumberPicker numberPicker, int maxValue) {
-        numberPicker.setMinValue(0);
-        numberPicker.setMaxValue(maxValue);
-        numberPicker.setFormatter(i -> String.format("%02d", i));
-        numberPicker.setOnValueChangedListener((picker, oldVal, newVal) -> {
-            System.out.println("NumberPicker updated: " + newVal);
-        });
-        setNumberPickerTextColor(numberPicker);
-    }
-
-    private void setNumberPickerTextColor(NumberPicker numberPicker) {
-        try {
-            // Duyệt qua tất cả các field của NumberPicker
-            Field[] fields = NumberPicker.class.getDeclaredFields();
-            for (Field field : fields) {
-                if (field.getName().equals("mSelectorWheelPaint")) {
-                    field.setAccessible(true);
-                    Paint paint = (Paint) field.get(numberPicker);
-                    assert paint != null;
-                    paint.setColor(Color.WHITE);
-                    numberPicker.invalidate();
-                }
-            }
-
-            // Duyệt qua các TextView con bên trong NumberPicker
-            for (int i = 0; i < numberPicker.getChildCount(); i++) {
-                View child = numberPicker.getChildAt(i);
-                if (child instanceof TextView) {
-                    ((TextView) child).setTextColor(Color.WHITE);
-                    child.invalidate();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     private void showSoundPlayingList() {
@@ -287,12 +246,6 @@ public class AmbienceFragment extends Fragment implements
             }
         });
 
-//        dialogPlayingSoundListBinding.btnCancel.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                bottomListPlayingDialog.dismiss();
-//            }
-//        });
         dialogPlayingSoundListBinding.btnDone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -310,7 +263,6 @@ public class AmbienceFragment extends Fragment implements
             String soundFileName = clickedSound.getFileName();
             int resId = ambienceFragmentViewModel.getResIdSong(soundFileName, requireActivity());
             ambienceFragmentViewModel.toggleSound(clickedSound, requireActivity());
-            soundAdapter.notifyDataSetChanged();
             Intent intent = ambienceFragmentViewModel.createPlaySoundIntent(resId);
             intent.setClass(requireActivity(), AmbienceService.class);
             requireContext().startService(intent);

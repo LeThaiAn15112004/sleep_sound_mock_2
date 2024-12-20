@@ -27,7 +27,7 @@ public class MySharedPreferences {
         editor.apply();
     }
 
-    public boolean getBooleanValue(String key) {
+    public boolean getBooleanValue(String key, boolean b) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(MY_SHARED_PREFERENCES, Context.MODE_PRIVATE);
         return sharedPreferences.getBoolean(key, false);
     }
@@ -53,7 +53,7 @@ public class MySharedPreferences {
         editor.apply();
     }
 
-    public int getIntValue(String key) {
+    public int getIntValue(String key, int i) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(MY_SHARED_PREFERENCES, Context.MODE_PRIVATE);
         return sharedPreferences.getInt(key, 0);
     }

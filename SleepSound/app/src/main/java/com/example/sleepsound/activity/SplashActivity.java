@@ -5,10 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import android.os.Handler;
+
 import android.view.WindowManager;
 
 import com.example.sleepsound.R;
@@ -23,7 +20,7 @@ public class SplashActivity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_splash);
-        boolean afterFirstRun = mySharedPreferences.getBooleanValue("afterFirstRun");
+        boolean afterFirstRun = mySharedPreferences.getBooleanValue("afterFirstRun", false);
         if (afterFirstRun){
             new Handler().postDelayed(() ->{
                 Intent intent = new Intent(SplashActivity.this, MainActivity.class);

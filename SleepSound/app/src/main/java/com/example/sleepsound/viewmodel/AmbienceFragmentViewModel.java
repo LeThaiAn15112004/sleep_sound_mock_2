@@ -4,7 +4,12 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.CountDownTimer;
+import android.view.View;
+import android.widget.NumberPicker;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.lifecycle.AndroidViewModel;
@@ -21,6 +26,7 @@ import com.google.gson.reflect.TypeToken;
 import java.io.Closeable;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -53,12 +59,18 @@ public class AmbienceFragmentViewModel extends ViewModel {
 
     @SuppressLint("DefaultLocale")
     public void updateFormattedStopTime() {
-        String formatted = String.format("%02d:%02d:%02d",
-                mySharedPreferences.getIntValue("hourStopSound"),
-                mySharedPreferences.getIntValue("minuteStopSound"),
-                mySharedPreferences.getIntValue("secondStopSound"));
+        // Lấy giá trị từ SharedPreferences hoặc mặc định là 0
+        int hour = mySharedPreferences.getIntValue("hourStopSound", 0);
+        int minute = mySharedPreferences.getIntValue("minuteStopSound", 0);
+        int second = mySharedPreferences.getIntValue("secondStopSound", 0);
+
+        // Định dạng thời gian
+        String formatted = String.format("%02d:%02d:%02d", hour, minute, second);
+
+        // Cập nhật giá trị
         formattedStopTime.setValue(formatted);
     }
+
 
     private void loadSounds() {
         Gson gson = new Gson();
@@ -181,6 +193,43 @@ public class AmbienceFragmentViewModel extends ViewModel {
         livePlayingSoundList.setValue(playingSounds);
     }
 
+    @SuppressLint("DefaultLocale")
+    public void setupNumberPicker(NumberPicker numberPicker, int maxValue) {
+        numberPicker.setMinValue(0);
+        numberPicker.setMaxValue(maxValue);
+        numberPicker.setFormatter(i -> String.format("%02d", i));
+        numberPicker.setOnValueChangedListener((picker, oldVal, newVal) -> {
+            System.out.println("NumberPicker updated: " + newVal);
+        });
+        setNumberPickerTextColor(numberPicker);
+    }
+
+    private void setNumberPickerTextColor(NumberPicker numberPicker) {
+        try {
+            // Duyệt qua tất cả các field của NumberPicker
+            Field[] fields = NumberPicker.class.getDeclaredFields();
+            for (Field field : fields) {
+                if (field.getName().equals("mSelectorWheelPaint")) {
+                    field.setAccessible(true);
+                    Paint paint = (Paint) field.get(numberPicker);
+                    assert paint != null;
+                    paint.setColor(Color.WHITE);
+                    numberPicker.invalidate();
+                }
+            }
+
+            // Duyệt qua các TextView con bên trong NumberPicker
+            for (int i = 0; i < numberPicker.getChildCount(); i++) {
+                View child = numberPicker.getChildAt(i);
+                if (child instanceof TextView) {
+                    ((TextView) child).setTextColor(Color.WHITE);
+                    child.invalidate();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public MutableLiveData<List<Sound>> getLiveSoundList() {
         return liveSoundList;
