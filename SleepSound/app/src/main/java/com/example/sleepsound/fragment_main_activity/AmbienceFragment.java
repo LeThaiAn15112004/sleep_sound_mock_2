@@ -67,27 +67,23 @@ public class AmbienceFragment extends Fragment implements
 
     private void initialize() {
         try {
-//            StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.HORIZONTAL);
-//          fragmentAmbienceBinding.ambienceRecycleView.setLayoutManager(layoutManager);
-//          fragmentAmbienceBinding.ambienceRecycleView.setHasFixedSize(true);
+
             ambienceFragmentViewModel = new ViewModelProvider(requireActivity()).get(AmbienceFragmentViewModel.class);
-
-//            ambienceFragmentViewModel.getLiveSoundList().observe(requireActivity(), sounds -> {
-//                if (soundAdapter == null) {
-//                    soundAdapter = new SoundAdapter(requireActivity(), sounds);
-//                    fragmentAmbienceBinding.ambienceRecycleView.setAdapter(soundAdapter);
-//                    initializePagination(sounds);
-//                    soundAdapter.setOnItemClickListener(AmbienceFragment.this);
-//                } else {
-//                    soundAdapter.setSoundList(sounds); // Assuming you have this method to refresh the adapter
-//                }
-//            });
-
+            ambienceFragmentViewModel.setMySharedPreferences(mySharedPreferences);
+            ambienceFragmentViewModel.updateFormattedStopTime();
             ambienceFragmentViewModel.getLiveSoundList().observe(requireActivity(), new Observer<List<Sound>>() {
                 @Override
                 public void onChanged(List<Sound> sounds) {
                     if (sounds != null && !sounds.isEmpty()) {
-                        initializePagination(sounds); // Truyền danh sách âm thanh thực sự vào đây
+                        soundAdapter = new SoundAdapter(requireActivity(), listSoundPerIndex(sounds, 0, 9));
+//                        fragmentAmbienceBinding.viewPager.setAdapter(soundAdapter);
+                        initializePagination(sounds);
+//                        soundAdapter.setOnItemClickListener(AmbienceFragment.this);
+                        if (soundAdapter != null) {
+                            soundAdapter.notifyDataSetChanged();
+                            soundAdapter.setOnItemClickListener(AmbienceFragment.this);
+                        }
+
                     } else {
                         Toast.makeText(requireActivity(), "No sounds available!", Toast.LENGTH_SHORT).show();
                     }
@@ -106,15 +102,22 @@ public class AmbienceFragment extends Fragment implements
                 }
             });
 
+            ambienceFragmentViewModel.getFormattedStopTime().observe(getViewLifecycleOwner(), time -> {
+                fragmentAmbienceBinding.tabTextTimer.setText(time);
+            });
+
             ambienceFragmentViewModel.getLiveHavingPlayingSound().observe(requireActivity(), isPlaying -> {
                 int iconRes = isPlaying ? R.drawable.ic_pause : R.drawable.ic_play;
                 fragmentAmbienceBinding.btnPlay.setIconResource(iconRes);
             });
+
+            if (soundAdapter != null) { soundAdapter.notifyDataSetChanged(); }
         } catch (Exception e) {
             Toast.makeText(requireActivity(), "Something went wrong, please try again later !", Toast.LENGTH_SHORT).show();
             System.err.println(e);
         }
     }
+
 
     private List<List<Sound>> paginateList(List<Sound> originalList, int itemsPerPage) {
         List<List<Sound>> paginatedList = new ArrayList<>();
@@ -125,32 +128,39 @@ public class AmbienceFragment extends Fragment implements
         return paginatedList;
     }
 
+    private List<Sound> listSoundPerIndex(List<Sound> originalList, int start, int end){
+        List<Sound> sounds = new ArrayList<>();
+        for (int i = start; i < end; i++) {
+            sounds.add(originalList.get(i));
+        }
+        return sounds;
+    }
+
 
     private void initializePagination(List<Sound> sounds) {
         paginatedSoundList = paginateList(sounds, itemsPerPage); // Chuyển đổi danh sách âm thanh thành phân trang
         initializeViewPager(paginatedSoundList); // Gán vào ViewPager
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private void initializeViewPager(List<List<Sound>> paginatedSoundList) {
         ViewPager2 viewPager = fragmentAmbienceBinding.viewPager;
         TabLayout tabLayout = fragmentAmbienceBinding.tabLayout;
-
-        // Gán adapter cho ViewPager2
-        viewPager.setAdapter(new ViewPagerAmbienceAdapter(requireActivity(), paginatedSoundList, ambienceFragmentViewModel));
-
-        // Kết nối TabLayout và ViewPager2
+        if (!paginatedSoundList.isEmpty()) {
+            soundAdapter = new SoundAdapter(requireContext(), paginatedSoundList.get(0));
+        }
+        viewPager.setAdapter(new ViewPagerAmbienceAdapter(requireActivity(), paginatedSoundList, ambienceFragmentViewModel, soundAdapter));
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
-            // Tùy chỉnh hiển thị chấm cho mỗi tab
             tab.setIcon(position == 0 ? R.drawable.ic_dot_active : R.drawable.ic_dot_inactive);
         }).attach();
-
-        // Đăng ký sự kiện khi người dùng vuốt qua các trang
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
-                // Khi người dùng vuốt sang trang mới, có thể thực hiện hành động tùy chỉnh
-                // Ví dụ: thay đổi màu sắc của tab hoặc thông báo cho người dùng
+                if (position < paginatedSoundList.size()) {
+                    soundAdapter.setSoundList(paginatedSoundList.get(position));
+                    soundAdapter.notifyDataSetChanged();
+                }
                 Log.d("PageSelected", "Page: " + position);
                 for (int i = 0; i < tabLayout.getTabCount(); i++) {
                     TabLayout.Tab tabItem = tabLayout.getTabAt(i);
@@ -295,16 +305,16 @@ public class AmbienceFragment extends Fragment implements
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onItemClick(int pos) {
-        try{
+        try {
             Sound clickedSound = soundAdapter.getSoundList().get(pos);
             String soundFileName = clickedSound.getFileName();
             int resId = ambienceFragmentViewModel.getResIdSong(soundFileName, requireActivity());
-            soundAdapter.notifyDataSetChanged();
             ambienceFragmentViewModel.toggleSound(clickedSound, requireActivity());
+            soundAdapter.notifyDataSetChanged();
             Intent intent = ambienceFragmentViewModel.createPlaySoundIntent(resId);
             intent.setClass(requireActivity(), AmbienceService.class);
             requireContext().startService(intent);
-        }catch (Exception e){
+        } catch (Exception e) {
             Toast.makeText(requireActivity(), "Something went wrong, please try again later", Toast.LENGTH_SHORT).show();
             System.err.println(e.getMessage());
         }
@@ -313,17 +323,21 @@ public class AmbienceFragment extends Fragment implements
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onCancelClick(int pos) {
-        try{
+        try {
             Sound clickedSound = soundPlayingAdapter.getSoundPlayingList().get(pos);
             String soundFileName = clickedSound.getFileName();
             int resId = ambienceFragmentViewModel.getResIdSong(soundFileName, requireActivity());
             soundPlayingAdapter.notifyDataSetChanged();
-            soundAdapter.notifyDataSetChanged();
+            if (soundAdapter != null) {
+                soundAdapter.notifyDataSetChanged();
+            } else {
+                Toast.makeText(requireActivity(), "Adapter is not initialized", Toast.LENGTH_SHORT).show();
+            }
             ambienceFragmentViewModel.toggleSound(clickedSound, requireActivity());
             Intent intent = ambienceFragmentViewModel.createPlaySoundIntent(resId);
             intent.setClass(requireActivity(), AmbienceService.class);
             requireContext().startService(intent);
-        }catch (Exception e){
+        } catch (Exception e) {
             Toast.makeText(requireActivity(), "Something went wrong, please try again later", Toast.LENGTH_SHORT).show();
             System.err.println(e.getMessage());
         }
@@ -332,14 +346,14 @@ public class AmbienceFragment extends Fragment implements
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onSeekBarChange(int pos) {
-        try{
+        try {
             Sound clickedSound = soundPlayingAdapter.getSoundPlayingList().get(pos);
             String soundFileName = clickedSound.getFileName();
             int resId = ambienceFragmentViewModel.getResIdSong(soundFileName, requireActivity());
             Intent intent = ambienceFragmentViewModel.createChangeVolumeSoundIntent(resId, clickedSound.getVolume());
             intent.setClass(requireActivity(), AmbienceService.class);
             requireContext().startService(intent);
-        }catch (Exception e){
+        } catch (Exception e) {
             Toast.makeText(requireActivity(), "Something went wrong, please try again later", Toast.LENGTH_SHORT).show();
             System.err.println(e.getMessage());
         }

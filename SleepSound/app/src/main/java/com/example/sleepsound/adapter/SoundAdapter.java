@@ -56,7 +56,7 @@ public class SoundAdapter extends RecyclerView.Adapter<SoundAdapter.SoundViewHol
     @Override
     public void onBindViewHolder(@NonNull SoundViewHolder holder, int position) {
         Sound sound = soundList.get(position);
-        holder.bind(sound, onItemClickListener);
+        holder.bind(sound, onItemClickListener, position);
     }
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
@@ -80,7 +80,7 @@ public class SoundAdapter extends RecyclerView.Adapter<SoundAdapter.SoundViewHol
             this.itemAmbienceBinding = itemAmbienceBinding;
         }
 
-        public void bind(Sound sound, OnItemClickListener onItemClickListener) {
+        public void bind(Sound sound, OnItemClickListener onItemClickListener, int position) {
             try {
                 // Set icon image
                 String resourceName = sound.getIcon().replace(".svg", "");
@@ -104,7 +104,7 @@ public class SoundAdapter extends RecyclerView.Adapter<SoundAdapter.SoundViewHol
                 // Set click listener
                 itemAmbienceBinding.getRoot().setOnClickListener(v -> {
                     if (onItemClickListener != null) {
-                        onItemClickListener.onItemClick(getAdapterPosition());
+                        onItemClickListener.onItemClick(position);
                     }
                 });
             } catch (Exception e) {

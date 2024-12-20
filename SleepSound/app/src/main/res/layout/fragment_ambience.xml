@@ -65,15 +65,18 @@
             <!--  TabLayout hiển thị chỉ số chấm  -->
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/tabLayout"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                app:tabIndicator="@drawable/ic_dot_inactive"
-                app:tabIndicatorAnimationDuration="300"
-                app:tabIndicatorColor="@android:color/white"
-                app:tabIndicatorHeight="4dp"
-                app:tabSelectedTextColor="@android:color/white"
-                app:tabTextColor="@android:color/darker_gray" />
+                android:background="@android:color/transparent"
+                android:elevation="0dp"
+                app:tabIndicatorColor="@color/white"
+                app:tabTextColor="@color/white"
+                app:tabSelectedTextColor="@color/blue_light"
+                app:tabGravity="center"
+                app:tabMode="fixed"
+                app:tabInlineLabel="true" />
+
+
         </LinearLayout>
 
         <LinearLayout

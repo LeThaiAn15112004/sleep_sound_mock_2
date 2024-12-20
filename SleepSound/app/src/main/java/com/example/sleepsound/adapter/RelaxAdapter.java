@@ -7,17 +7,17 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.sleepsound.model.Mix;
+import com.example.sleepsound.model.Relax;
 
 import java.util.List;
 
-public class MixAdapter extends RecyclerView.Adapter<MixAdapter.RelaxViewHolder>{
+public class RelaxAdapter extends RecyclerView.Adapter<RelaxAdapter.RelaxViewHolder>{
     private Context context;
-    private List<Mix> mixs;
+    private List<Relax> relaxes;
     private OnItemClickListener onItemClickListener;
 
-    public MixAdapter(List<Mix> mixs, Context context) {
-        this.mixs = mixs;
+    public RelaxAdapter(List<Relax> relaxes, Context context) {
+        this.relaxes = relaxes;
         this.context = context;
     }
 
@@ -29,12 +29,12 @@ public class MixAdapter extends RecyclerView.Adapter<MixAdapter.RelaxViewHolder>
         this.context = context;
     }
 
-    public List<Mix> getMixs() {
-        return mixs;
+    public List<Relax> getRelaxes() {
+        return relaxes;
     }
 
-    public void setMixs(List<Mix> mixs) {
-        this.mixs = mixs;
+    public void setRelaxes(List<Relax> relaxes) {
+        this.relaxes = relaxes;
     }
 
     public OnItemClickListener getOnItemClickListener() {
@@ -47,12 +47,12 @@ public class MixAdapter extends RecyclerView.Adapter<MixAdapter.RelaxViewHolder>
 
     @NonNull
     @Override
-    public MixAdapter.RelaxViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public RelaxAdapter.RelaxViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return null;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MixAdapter.RelaxViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RelaxAdapter.RelaxViewHolder holder, int position) {
 
     }
 

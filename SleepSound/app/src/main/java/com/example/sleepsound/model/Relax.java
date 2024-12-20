@@ -2,14 +2,14 @@ package com.example.sleepsound.model;
 
 import java.util.List;
 
-public class Mix {
+public class Relax {
     private int mixSoundId;
     private int category;
     private String name;
     private Cover cover;
     private List<Volume> volumes;
 
-    public Mix(int mixSoundId, int category, String name, Cover cover, List<Volume> volumes) {
+    public Relax(int mixSoundId, int category, String name, Cover cover, List<Volume> volumes) {
         this.mixSoundId = mixSoundId;
         this.category = category;
         this.name = name;
@@ -19,7 +19,7 @@ public class Mix {
 
     @Override
     public String toString() {
-        return "Mix{" +
+        return "Relax{" +
                 "mixSoundId=" + mixSoundId +
                 ", category=" + category +
                 ", name='" + name + '\'' +

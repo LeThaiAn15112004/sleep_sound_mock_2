@@ -1,5 +1,6 @@
 package com.example.sleepsound.viewmodel;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
@@ -34,6 +35,9 @@ public class AmbienceFragmentViewModel extends ViewModel {
     private MutableLiveData<List<Sound>> livePlayingSoundList;
     private MutableLiveData<Integer> liveNumberPlaying;
     private MutableLiveData<Boolean> liveHavingPlayingSound;
+    private MutableLiveData<String> formattedStopTime;
+
+    private MySharedPreferences mySharedPreferences;
 
     public AmbienceFragmentViewModel() {
         sounds = new ArrayList<>();
@@ -42,8 +46,18 @@ public class AmbienceFragmentViewModel extends ViewModel {
         this.livePlayingSoundList = new MutableLiveData<>();
         this.liveNumberPlaying = new MutableLiveData<>();
         this.liveHavingPlayingSound = new MutableLiveData<>();
+        this.formattedStopTime = new MutableLiveData<>();
         loadSounds();
         getPlayingSounds();
+    }
+
+    @SuppressLint("DefaultLocale")
+    public void updateFormattedStopTime() {
+        String formatted = String.format("%02d:%02d:%02d",
+                mySharedPreferences.getIntValue("hourStopSound"),
+                mySharedPreferences.getIntValue("minuteStopSound"),
+                mySharedPreferences.getIntValue("secondStopSound"));
+        formattedStopTime.setValue(formatted);
     }
 
     private void loadSounds() {
@@ -82,6 +96,7 @@ public class AmbienceFragmentViewModel extends ViewModel {
             sound.setPlaying(true);
         }
         updatePlayingStatus();
+        liveSoundList.setValue(new ArrayList<>(sounds));
         getPlayingSounds();
     }
 
@@ -118,27 +133,41 @@ public class AmbienceFragmentViewModel extends ViewModel {
         int minuteNow = timeNow.getMinute();
         int secondNow = timeNow.getSecond();
         System.out.println("Start timer with: hour=" + hourNow + ", minute=" + minuteNow + ", second=" + secondNow);
+
+        // Tính thời gian hiện tại và thời gian đặt
         int millisTimeSet = (hours * 3600 + minutes * 60 + seconds) * 1000;
         int millisTimeNow = (hourNow * 3600 + minuteNow * 60 + secondNow) * 1000;
+
+        // Kiểm tra thời gian đặt trước hay sau thời gian hiện tại
         int totalMillis = millisTimeSet - millisTimeNow;
+        if (totalMillis < 0) {
+            // Thời gian đặt là ngày hôm sau, cộng thêm 24 giờ
+            totalMillis += 24 * 3600 * 1000;
+        }
         System.out.println("totalMillis: " + totalMillis);
+
+        // Đếm ngược
         new CountDownTimer(totalMillis, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
+                // Hiển thị hoặc xử lý trong mỗi giây nếu cần
             }
 
             @Override
             public void onFinish() {
+                // Khi kết thúc, dừng nhạc và hiển thị thông báo
                 stopAllSounds(context);
                 Toast.makeText(context, "Stop all sounds", Toast.LENGTH_SHORT).show();
             }
         }.start();
     }
 
+
     public void setTimeStopSound(int hour, int minute, int second, MySharedPreferences mySharedPreferences) {
         mySharedPreferences.putIntValue("hourStopSound", hour);
         mySharedPreferences.putIntValue("minuteStopSound", minute);
         mySharedPreferences.putIntValue("secondStopSound", second);
+        updateFormattedStopTime();
     }
 
     public void getPlayingSounds() {
@@ -183,5 +212,21 @@ public class AmbienceFragmentViewModel extends ViewModel {
 
     public void setLivePlayingSoundList(MutableLiveData<List<Sound>> livePlayingSoundList) {
         this.livePlayingSoundList = livePlayingSoundList;
+    }
+
+    public MutableLiveData<String> getFormattedStopTime() {
+        return formattedStopTime;
+    }
+
+    public void setFormattedStopTime(MutableLiveData<String> formattedStopTime) {
+        this.formattedStopTime = formattedStopTime;
+    }
+
+    public MySharedPreferences getMySharedPreferences() {
+        return mySharedPreferences;
+    }
+
+    public void setMySharedPreferences(MySharedPreferences mySharedPreferences) {
+        this.mySharedPreferences = mySharedPreferences;
     }
 }
