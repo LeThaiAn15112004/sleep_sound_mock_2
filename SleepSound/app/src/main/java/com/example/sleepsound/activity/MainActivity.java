@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
                     switch (pos) {
                         case 0:
                             customTabBinding.tabIcon.setImageResource(R.drawable.ic_moon_sound);
-                            customTabBinding.tabText.setText("Relax Sound");
+                            customTabBinding.tabText.setText("Mix Sound");
                             break;
                         case 1:
                             customTabBinding.tabIcon.setImageResource(R.drawable.ic_ambience);

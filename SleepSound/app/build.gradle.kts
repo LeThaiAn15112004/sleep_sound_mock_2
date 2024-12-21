@@ -29,7 +29,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    buildFeatures{
+    buildFeatures {
         viewBinding = true
     }
     defaultConfig {
@@ -38,6 +38,13 @@ android {
 }
 
 dependencies {
+    //glide bo tròn góc
+    implementation ("jp.wasabeef:glide-transformations:4.3.0")
+
+    // ExoPlayer cho việc phát media (chỉ giữ một phiên bản)
+    implementation("com.google.android.exoplayer:exoplayer:2.18.1")
+    implementation("com.github.bumptech.glide:glide:4.12.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
     implementation("com.google.android.material:material:1.9.0")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation(libs.appcompat)

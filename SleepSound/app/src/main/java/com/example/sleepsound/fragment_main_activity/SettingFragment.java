@@ -1,5 +1,6 @@
 package com.example.sleepsound.fragment_main_activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -24,21 +25,21 @@ public class SettingFragment extends Fragment {
     private MySharedPreferences mySharedPreferences;
     private SettingFragmentViewModel settingFragmentViewModel;
     private FragmentSettingBinding fragmentSettingBinding;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mySharedPreferences = new MySharedPreferences(requireActivity());
         fragmentSettingBinding = FragmentSettingBinding.inflate(inflater, container, false);
+        settingFragmentViewModel = new ViewModelProvider(requireActivity()).get(SettingFragmentViewModel.class);
+        settingFragmentViewModel.setMySharedPreferences(mySharedPreferences);
         initialize();
         clicking();
         return fragmentSettingBinding.getRoot();
     }
 
     private void initialize() {
-        try{
-            settingFragmentViewModel = new ViewModelProvider(requireActivity()).get(SettingFragmentViewModel.class);
-            settingFragmentViewModel.setMySharedPreferences(mySharedPreferences);
-
+        try {
             settingFragmentViewModel.updateFormattedReminderTime();
 
             settingFragmentViewModel.getFormattedReminderTime().observe(requireActivity(), new Observer<String>() {
@@ -47,7 +48,7 @@ public class SettingFragment extends Fragment {
                     fragmentSettingBinding.bedtimeReminderTime.setText(s);
                 }
             });
-        }catch (Exception e){
+        } catch (Exception e) {
             Toast.makeText(requireActivity(), "Something went wrong, please try again later !", Toast.LENGTH_SHORT).show();
             System.err.println(e);
         }
@@ -71,7 +72,7 @@ public class SettingFragment extends Fragment {
         fragmentSettingBinding.shareThisApp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(v.getContext(), "Share This App clicked", Toast.LENGTH_SHORT).show();
+                shareApp();
             }
         });
 
@@ -83,29 +84,44 @@ public class SettingFragment extends Fragment {
         });
     }
 
-    private void showClockDialog(){
+    private void shareApp() {
+        Intent shareIntent = settingFragmentViewModel.getShareAppIntent(requireContext());
+        startActivity(Intent.createChooser(shareIntent, "Share App via"));
+        Toast.makeText(requireContext(), "Sharing...", Toast.LENGTH_SHORT).show();
+    }
+
+    private void showClockDialog() {
         BottomSheetDialog bottomClockDialog = new BottomSheetDialog(requireActivity());
         DialogTimePickerSettingBinding dialogTimePickerSettingBinding = DialogTimePickerSettingBinding.inflate(getLayoutInflater());
         bottomClockDialog.setContentView(dialogTimePickerSettingBinding.getRoot());
 
         settingFragmentViewModel.setupNumberPicker(dialogTimePickerSettingBinding.hourPicker, 23);
         settingFragmentViewModel.setupNumberPicker(dialogTimePickerSettingBinding.minutePicker, 59);
+        settingFragmentViewModel.setupNumberPicker(dialogTimePickerSettingBinding.secondPicker, 59);
 
         dialogTimePickerSettingBinding.switchToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             dialogTimePickerSettingBinding.switchText.setText(isChecked ? "Turn On" : "Turn Off");
         });
 
+        settingFragmentViewModel.getLiveTurnOn().observe(requireActivity(), isTurnedOn -> {
+            dialogTimePickerSettingBinding.switchToggle.setChecked(isTurnedOn);
+            dialogTimePickerSettingBinding.switchText.setText(isTurnedOn ? "Turn On" : "Turn Off");
+        });
+
         dialogTimePickerSettingBinding.hourPicker.setValue(mySharedPreferences.getIntValue("hourReminderSleep", 0));
         dialogTimePickerSettingBinding.minutePicker.setValue(mySharedPreferences.getIntValue("minuteReminderSleep", 0));
-        dialogTimePickerSettingBinding.switchText.setText(mySharedPreferences.getBooleanValue("turnOnReminder", false) ? "Turn On":"Turn Off");
-        dialogTimePickerSettingBinding.switchToggle.setChecked(mySharedPreferences.getBooleanValue("turnOnReminder", false));
+        dialogTimePickerSettingBinding.secondPicker.setValue(mySharedPreferences.getIntValue("secondReminderSleep", 0));
+//        dialogTimePickerSettingBinding.switchText.setText(mySharedPreferences.getBooleanValue("turnOnReminder", false) ? "Turn On":"Turn Off");
+//        dialogTimePickerSettingBinding.switchToggle.setChecked(mySharedPreferences.getBooleanValue("turnOnReminder", false));
 
         dialogTimePickerSettingBinding.btnDone.setOnClickListener(v -> {
             int hour = dialogTimePickerSettingBinding.hourPicker.getValue();
             int minute = dialogTimePickerSettingBinding.minutePicker.getValue();
+            int second = dialogTimePickerSettingBinding.secondPicker.getValue();
             boolean isTurnOn = dialogTimePickerSettingBinding.switchToggle.isChecked();
-            settingFragmentViewModel.setTimeReminder(hour, minute, isTurnOn, mySharedPreferences);
-            System.out.println(hour + ":" + minute + " | " + (isTurnOn ? "On" : "Off"));
+            settingFragmentViewModel.setTimeReminder(hour, minute, second, isTurnOn, mySharedPreferences);
+            settingFragmentViewModel.reminderSleepTime(hour, minute, second, isTurnOn, requireActivity());
+            System.out.println(hour + ":" + minute + ":" + second + " | " + (isTurnOn ? "On" : "Off"));
             bottomClockDialog.dismiss();
         });
         bottomClockDialog.show();

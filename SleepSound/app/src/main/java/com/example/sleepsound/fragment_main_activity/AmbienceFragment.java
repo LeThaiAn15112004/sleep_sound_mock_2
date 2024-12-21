@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.util.Log;
@@ -49,7 +50,6 @@ public class AmbienceFragment extends Fragment implements
     private AmbienceFragmentViewModel ambienceFragmentViewModel;
     private MySharedPreferences mySharedPreferences;
 
-    private int currentPage = 0;
     private int itemsPerPage = 9;
     private List<List<Sound>> paginatedSoundList;
 
@@ -58,15 +58,17 @@ public class AmbienceFragment extends Fragment implements
                              Bundle savedInstanceState) {
         mySharedPreferences = new MySharedPreferences(requireActivity());
         fragmentAmbienceBinding = FragmentAmbienceBinding.inflate(inflater, container, false);
+        ambienceFragmentViewModel = new ViewModelProvider(requireActivity()).get(AmbienceFragmentViewModel.class);
+        ambienceFragmentViewModel.setMySharedPreferences(mySharedPreferences);
         initialize();
         clicking();
         return fragmentAmbienceBinding.getRoot();
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private void initialize() {
         try {
-            ambienceFragmentViewModel = new ViewModelProvider(requireActivity()).get(AmbienceFragmentViewModel.class);
-            ambienceFragmentViewModel.setMySharedPreferences(mySharedPreferences);
+            StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.HORIZONTAL);
             ambienceFragmentViewModel.updateFormattedStopTime();
             ambienceFragmentViewModel.getLiveSoundList().observe(requireActivity(), new Observer<List<Sound>>() {
                 @Override
