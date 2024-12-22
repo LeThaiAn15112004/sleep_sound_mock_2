@@ -18,18 +18,20 @@ public class RelaxFragmentViewModel extends ViewModel {
     private List<Mix> mixList;
 
     private MutableLiveData<List<Mix>> liveMixList;
+    private MutableLiveData<Integer> selectedCategory;
 
     private MySharedPreferences mySharedPreferences;
 
-    public final int CATEGORY_PIANO_RELAX = 4;
-    public final int CATEGORY_RAIN = 3;
-    public final int CATEGORY_CITY = 2;
-    public final int CATEGORY_MEDITATION = 5;
-    public final int CATEGORY_FOCUS = 6;
-    public final int CATEGORY_ALL = 0;
+    public static final int CATEGORY_PIANO_RELAX = 4;
+    public static final int CATEGORY_RAIN = 3;
+    public static final int CATEGORY_CITY = 2;
+    public static final int CATEGORY_MEDITATION = 5;
+    public static final int CATEGORY_FOCUS = 6;
+    public static final int CATEGORY_ALL = 0;
 
     public RelaxFragmentViewModel(){
         liveMixList = new MutableLiveData<>();
+        selectedCategory = new MutableLiveData<>(CATEGORY_ALL);
         loadMixes();
     }
 
@@ -52,15 +54,16 @@ public class RelaxFragmentViewModel extends ViewModel {
         if (category == CATEGORY_ALL) {
             // Hiển thị tất cả các mục nếu category là "All"
             liveMixList.setValue(mixList);
+            selectedCategory.setValue(category);
         } else {
             // Lọc danh sách mix theo category
             List<Mix> filteredList = mixList.stream()
                     .filter(mix -> mix.getCategory() == category)
                     .collect(Collectors.toList());
             liveMixList.setValue(filteredList);
+            selectedCategory.setValue(category);
         }
     }
-
 
     public List<Mix> getMixList() {
         return mixList;
@@ -84,5 +87,13 @@ public class RelaxFragmentViewModel extends ViewModel {
 
     public void setMySharedPreferences(MySharedPreferences mySharedPreferences) {
         this.mySharedPreferences = mySharedPreferences;
+    }
+
+    public MutableLiveData<Integer> getSelectedCategory() {
+        return selectedCategory;
+    }
+
+    public void setSelectedCategory(MutableLiveData<Integer> selectedCategory) {
+        this.selectedCategory = selectedCategory;
     }
 }

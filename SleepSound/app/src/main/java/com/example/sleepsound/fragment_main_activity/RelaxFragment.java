@@ -19,14 +19,15 @@ import com.example.sleepsound.R;
 import com.example.sleepsound.activity.RelaxSoundActivity;
 import com.example.sleepsound.adapter.MixAdapter;
 import com.example.sleepsound.databinding.FragmentRelaxBinding;
-import com.example.sleepsound.databinding.FragmentSettingBinding;
 import com.example.sleepsound.model.Mix;
 import com.example.sleepsound.shared_preferences.MySharedPreferences;
 import com.example.sleepsound.viewmodel.RelaxFragmentViewModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class RelaxFragment extends Fragment implements MixAdapter.OnItemClickListener {
+public class RelaxFragment extends Fragment implements
+        MixAdapter.OnItemClickListener{
     private MySharedPreferences mySharedPreferences;
     private RelaxFragmentViewModel relaxFragmentViewModel;
     private FragmentRelaxBinding fragmentRelaxBinding;
@@ -50,6 +51,7 @@ public class RelaxFragment extends Fragment implements MixAdapter.OnItemClickLis
         try {
             GridLayoutManager gridLayoutManager = new GridLayoutManager(requireActivity(), 2);
             fragmentRelaxBinding.recyclerViewMixes.setLayoutManager(gridLayoutManager);
+
             relaxFragmentViewModel.getLiveMixList().observe(requireActivity(), new Observer<List<Mix>>() {
                 @Override
                 public void onChanged(List<Mix> mixes) {
@@ -59,9 +61,48 @@ public class RelaxFragment extends Fragment implements MixAdapter.OnItemClickLis
                     mixAdapter.setOnItemClickListener(RelaxFragment.this);
                 }
             });
+
+            relaxFragmentViewModel.getSelectedCategory().observe(requireActivity(), category -> {
+                updateButtonSelection(category);
+            });
         }catch (Exception e) {
             Toast.makeText(requireActivity(), "Something went wrong, please try again later !", Toast.LENGTH_SHORT).show();
             System.err.println(e);
+        }
+    }
+
+    private void updateButtonSelection(int category) {
+        if (selectedButton != null) {
+            selectedButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), R.color.button_background));
+        }
+
+        // Tìm nút tương ứng với danh mục
+        Button button = null;
+        switch (category) {
+            case RelaxFragmentViewModel.CATEGORY_PIANO_RELAX:
+                button = fragmentRelaxBinding.btnPianoRelax;
+                break;
+            case RelaxFragmentViewModel.CATEGORY_RAIN:
+                button = fragmentRelaxBinding.btnRain;
+                break;
+            case RelaxFragmentViewModel.CATEGORY_CITY:
+                button = fragmentRelaxBinding.btnCity;
+                break;
+            case RelaxFragmentViewModel.CATEGORY_MEDITATION:
+                button = fragmentRelaxBinding.btnMeditation;
+                break;
+            case RelaxFragmentViewModel.CATEGORY_FOCUS:
+                button = fragmentRelaxBinding.btnFocus;
+                break;
+            case RelaxFragmentViewModel.CATEGORY_ALL:
+            default:
+                button = fragmentRelaxBinding.btnAll;
+                break;
+        }
+
+        if (button != null) {
+            selectedButton = button;
+            selectedButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), R.color.button_selected));
         }
     }
 
@@ -138,19 +179,8 @@ public class RelaxFragment extends Fragment implements MixAdapter.OnItemClickLis
             }
 
             // Truyền danh sách Volumes dưới dạng chuỗi JSON (hoặc cách khác phù hợp)
-            List<Mix.Volume> volumes = clickedMix.getVolumes();
-            if (volumes != null && !volumes.isEmpty()) {
-                StringBuilder volumesJson = new StringBuilder("[");
-                for (Mix.Volume volume : volumes) {
-                    volumesJson.append("{")
-                            .append("\"id\":").append(volume.getId()).append(",")
-                            .append("\"volume\":").append(volume.getVolume())
-                            .append("},");
-                }
-                // Loại bỏ dấu phẩy cuối và thêm dấu ngoặc vuông đóng
-                volumesJson.deleteCharAt(volumesJson.length() - 1).append("]");
-                intent.putExtra("volumes", volumesJson.toString());
-            }
+            ArrayList<Mix.Sound> sounds = new ArrayList<>(clickedMix.getSounds());
+            intent.putParcelableArrayListExtra("sounds", sounds);
             startActivity(intent);
         }catch (Exception e) {
             Toast.makeText(requireActivity(), "Something went wrong, please try again later", Toast.LENGTH_SHORT).show();

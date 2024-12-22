@@ -1,5 +1,7 @@
 package com.example.sleepsound.fragment_main_activity;
 
+import static com.example.sleepsound.API.JsonHelper.*;
+
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
@@ -21,6 +23,7 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.sleepsound.API.JsonHelper;
 import com.example.sleepsound.R;
 import com.example.sleepsound.adapter.SoundAdapter;
 import com.example.sleepsound.adapter.SoundPlayingAdapter;
@@ -233,7 +236,6 @@ public class AmbienceFragment extends Fragment implements
             soundPlayingAdapter = new SoundPlayingAdapter(requireActivity(), new ArrayList<>());
             soundPlayingAdapter.setOnItemCancelClickListener(this);
             soundPlayingAdapter.setOnSeekBarChangeListener(this);
-
         }
         dialogPlayingSoundListBinding.ambiencePlayingRecycleView.setAdapter(soundPlayingAdapter);
 

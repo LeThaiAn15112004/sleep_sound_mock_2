@@ -1,5 +1,10 @@
 package com.example.sleepsound.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import androidx.annotation.NonNull;
+
 import java.util.List;
 
 public class Mix {
@@ -7,14 +12,14 @@ public class Mix {
     private int category;
     private String name;
     private Cover cover;
-    private List<Volume> volumes;
+    private List<Sound> sounds;
 
-    public Mix(int mixSoundId, int category, String name, Cover cover, List<Volume> volumes) {
+    public Mix(int mixSoundId, int category, String name, Cover cover, List<Sound> sounds) {
         this.mixSoundId = mixSoundId;
         this.category = category;
         this.name = name;
         this.cover = cover;
-        this.volumes = volumes;
+        this.sounds = sounds;
     }
 
     @Override
@@ -24,7 +29,7 @@ public class Mix {
                 ", category=" + category +
                 ", name='" + name + '\'' +
                 ", cover=" + cover +
-                ", volumes=" + volumes +
+                ", sounds=" + sounds +
                 '}';
     }
 
@@ -60,12 +65,12 @@ public class Mix {
         this.cover = cover;
     }
 
-    public List<Volume> getVolumes() {
-        return volumes;
+    public List<Sound> getSounds() {
+        return sounds;
     }
 
-    public void setVolumes(List<Volume> volumes) {
-        this.volumes = volumes;
+    public void setSounds(List<Sound> sounds) {
+        this.sounds = sounds;
     }
 
     // Class con `Cover`
@@ -104,18 +109,18 @@ public class Mix {
     }
 
     // Class con `Volume`
-    public static class Volume {
+    public static class Sound implements Parcelable {
         private int id;
         private int volume;
 
-        public Volume(int id, int volume) {
+        public Sound(int id, int volume) {
             this.id = id;
             this.volume = volume;
         }
 
         @Override
         public String toString() {
-            return "Volume{" +
+            return "Sound{" +
                     "id=" + id +
                     ", volume=" + volume +
                     '}';
@@ -135,6 +140,34 @@ public class Mix {
 
         public void setVolume(int volume) {
             this.volume = volume;
+        }
+
+        protected Sound(Parcel in) {
+            id = in.readInt();
+            volume = in.readInt();
+        }
+
+        public static final Creator<Sound> CREATOR = new Creator<Sound>() {
+            @Override
+            public Sound createFromParcel(Parcel in) {
+                return new Sound(in);
+            }
+
+            @Override
+            public Sound[] newArray(int size) {
+                return new Sound[size];
+            }
+        };
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            dest.writeInt(id);
+            dest.writeInt(volume);
         }
     }
 }

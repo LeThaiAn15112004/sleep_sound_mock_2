@@ -40,7 +40,8 @@ android {
 dependencies {
     //glide bo tròn góc
     implementation ("jp.wasabeef:glide-transformations:4.3.0")
-
+    implementation (libs.retrofit)
+    implementation (libs.converter.gson)
     // ExoPlayer cho việc phát media (chỉ giữ một phiên bản)
     implementation("com.google.android.exoplayer:exoplayer:2.18.1")
     implementation("com.github.bumptech.glide:glide:4.12.0")
