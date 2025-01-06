@@ -9,6 +9,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.sleepsound.R;
 import com.example.sleepsound.databinding.ItemGenreBinding;
 import com.example.sleepsound.model.Mix;
 
@@ -18,11 +19,17 @@ public class GenreAdapter extends RecyclerView.Adapter<GenreAdapter.GenreViewHol
     private Context context;
     private List<String> genres;
     private OnGenreClickListener onGenreClickListener;
+    private int selectedPosition = RecyclerView.NO_POSITION;
 
     public GenreAdapter(Context context, List<String> genres, OnGenreClickListener onGenreClickListener) {
         this.context = context;
         this.genres = genres;
         this.onGenreClickListener = onGenreClickListener;
+    }
+
+    public void setPosition(int position) {
+        selectedPosition = position;
+        notifyDataSetChanged();
     }
 
     public interface OnGenreClickListener {
@@ -66,7 +73,7 @@ public class GenreAdapter extends RecyclerView.Adapter<GenreAdapter.GenreViewHol
     @Override
     public void onBindViewHolder(@NonNull GenreAdapter.GenreViewHolder holder, int position) {
         String genre = genres.get(position);
-        holder.bind(genre, onGenreClickListener, position);
+        holder.bind(genre, onGenreClickListener, position, position == selectedPosition);
     }
 
     @Override
@@ -81,9 +88,12 @@ public class GenreAdapter extends RecyclerView.Adapter<GenreAdapter.GenreViewHol
             this.itemGenreBinding = itemGenreBinding;
         }
 
-        public void bind(String genre, GenreAdapter.OnGenreClickListener onGenreClickListener, int position) {
+        public void bind(String genre, GenreAdapter.OnGenreClickListener onGenreClickListener, int position, boolean isSelected) {
             try{
                 itemGenreBinding.tvGenreName.setText(genre);
+                itemGenreBinding.tvGenreName.setBackgroundResource(
+                        isSelected ? R.color.purple : R.color.blue_dark
+                );
                 itemGenreBinding.getRoot().setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {

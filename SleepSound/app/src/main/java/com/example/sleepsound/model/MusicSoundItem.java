@@ -28,6 +28,30 @@ public class MusicSoundItem {
         this.group = group;  // Initialize group (genre)
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public boolean isPremium() {
+        return premium;
+    }
+
+    public void setPremium(boolean premium) {
+        this.premium = premium;
+    }
+
+    public void setBackground(String background) {
+        this.background = background;
+    }
+
+    public void setBadge(String badge) {
+        this.badge = badge;
+    }
+
     // Getters
     public String getTitle() {
         return title;

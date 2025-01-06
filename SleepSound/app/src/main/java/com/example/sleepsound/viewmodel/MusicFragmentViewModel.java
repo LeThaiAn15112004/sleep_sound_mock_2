@@ -1,6 +1,7 @@
 package com.example.sleepsound.viewmodel;
 
 import android.util.Log;
+import android.view.View;
 
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -22,10 +23,18 @@ public class MusicFragmentViewModel extends ViewModel {
     private List<MusicSoundItem> fullMusicItem = new ArrayList<>();
     private List<MusicSoundGroup> fullMusicGroups = new ArrayList<>();
     private List<String> genres = new ArrayList<>();
+    private List<MusicSoundItem> recentlyPlayed = new ArrayList<>();
+    private String selectedGenre = "All";
 
     private MutableLiveData<List<MusicSoundItem>> liveFullMusicItem = new MutableLiveData<>();
     private MutableLiveData<List<MusicSoundGroup>> liveFullMusicGroups = new MutableLiveData<>();
     private MutableLiveData<List<String>> liveGenres = new MutableLiveData<>();
+    private MutableLiveData<List<MusicSoundItem>> liveRecentlyPlayed = new MutableLiveData<>();
+    private MutableLiveData<String> liveSelectedGenre = new MutableLiveData<>();
+
+    public MusicFragmentViewModel(){
+        loadMusicGroups();
+    }
 
     private void loadMusicGroups() {
         SoundApi api = RetrofitInstance.getApi();
@@ -35,6 +44,7 @@ public class MusicFragmentViewModel extends ViewModel {
                 if (response.isSuccessful() && response.body() != null) {
                     fullMusicGroups.addAll(response.body());
                     liveFullMusicGroups.setValue(fullMusicGroups); // Post the full list of groups
+                    loadMusicData();
                 } else {
                     logError(response);
                 }
@@ -42,18 +52,47 @@ public class MusicFragmentViewModel extends ViewModel {
 
             @Override
             public void onFailure(Call<List<MusicSoundGroup>> call, Throwable t) {
-                Log.e("MusicViewModel", "Failed to load data", t);
+                Log.e("MusicFragmentViewModel", "Failed to load data", t);
+                liveFullMusicGroups.setValue(new ArrayList<>());
             }
         });
+    }
+
+    public void filterMusicByGenre(String genre) {
+        List<MusicSoundItem> filtered = new ArrayList<>();
+        for (MusicSoundItem item : fullMusicItem) {
+            if ("All".equals(genre) || item.getGroup().equals(genre)) {
+                filtered.add(item);
+            }
+        }
+        liveFullMusicItem.setValue(filtered);
+        liveSelectedGenre.setValue(genre);
+    }
+
+    private void loadMusicData(){
+        if (fullMusicGroups != null && !fullMusicGroups.isEmpty()) {
+            fullMusicItem.clear();
+            genres.clear();
+            genres.add("All");
+            liveSelectedGenre.setValue("All");
+            // Use explicit type MusicSoundGroup for the loop
+            for (MusicSoundGroup group : fullMusicGroups) {
+                fullMusicItem.addAll(group.getItems()); // group.getItems() returns List<MusicSoundItem>
+                genres.add(group.getGroup()); // group.getGroup() returns String
+            }
+
+            liveFullMusicItem.setValue(fullMusicItem);
+            liveGenres.setValue(genres);
+        }
     }
 
     private void logError(Response<List<MusicSoundGroup>> response) {
         try {
             if (response.errorBody() != null) {
-                Log.e("MusicViewModel", "API Error: " + response.errorBody().string());
+                Log.e("MusicFragmentViewModel", "API Error: " + response.errorBody().string());
             }
         } catch (IOException e) {
-            Log.e("MusicViewModel", "Error parsing error body", e);
+            Log.e("MusicFragmentViewModel", "Error parsing error body", e);
         }
     }
 
@@ -103,5 +142,37 @@ public class MusicFragmentViewModel extends ViewModel {
 
     public void setLiveGenres(MutableLiveData<List<String>> liveGenres) {
         this.liveGenres = liveGenres;
+    }
+
+    public List<MusicSoundItem> getRecentlyPlayed() {
+        return recentlyPlayed;
+    }
+
+    public void setRecentlyPlayed(List<MusicSoundItem> recentlyPlayed) {
+        this.recentlyPlayed = recentlyPlayed;
+    }
+
+    public MutableLiveData<List<MusicSoundItem>> getLiveRecentlyPlayed() {
+        return liveRecentlyPlayed;
+    }
+
+    public void setLiveRecentlyPlayed(MutableLiveData<List<MusicSoundItem>> liveRecentlyPlayed) {
+        this.liveRecentlyPlayed = liveRecentlyPlayed;
+    }
+
+    public String getSelectedGenre() {
+        return selectedGenre;
+    }
+
+    public void setSelectedGenre(String selectedGenre) {
+        this.selectedGenre = selectedGenre;
+    }
+
+    public MutableLiveData<String> getLiveSelectedGenre() {
+        return liveSelectedGenre;
+    }
+
+    public void setLiveSelectedGenre(MutableLiveData<String> liveSelectedGenre) {
+        this.liveSelectedGenre = liveSelectedGenre;
     }
 }
