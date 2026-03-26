@@ -74,7 +74,6 @@ public class RelaxSoundActivity extends AppCompatActivity implements SoundPlayin
             Intent intent = new Intent(this, RelaxService.class);
             intent.setAction(RelaxService.PAUSE_SOUND_ACTION);
             startService(intent);
-            this.startActivity(intent);
         }catch (Exception e) {
             Toast.makeText(this, "Something went wrong, please try again later", Toast.LENGTH_SHORT).show();
             System.err.println(e);
@@ -139,10 +138,11 @@ public class RelaxSoundActivity extends AppCompatActivity implements SoundPlayin
             List<Sound> soundList = JsonHelper.loadSounds(this);
             if (sounds != null) {
                 for (Mix.Sound sound : sounds) {
-                    // Xử lý từng `Sound`
                     System.out.println("Sound ID: " + sound.getId() + ", Volume: " + sound.getVolume());
                     Sound foundedSound = relaxSoundActivityViewModel.findSoundById(soundList, sound.getId());
-                    playSound(foundedSound);
+                    if (foundedSound != null) {
+                        playSound(foundedSound);
+                    }
                 }
             }
 
@@ -195,9 +195,8 @@ public class RelaxSoundActivity extends AppCompatActivity implements SoundPlayin
             int resId = relaxSoundActivityViewModel.getResIdSong(sound.getFileName(), this);
             Intent intent = new Intent(this, RelaxService.class);
             intent.setAction(RelaxService.PLAY_SOUND_ACTION);
-            intent.putExtra("resId", resId); // Đảm bảo file audio có trong thư mục res/raw
+            intent.putExtra("resId", resId);
             startService(intent);
-            this.startActivity(intent);
             updateSeekBar();
         } catch (Exception e) {
             Toast.makeText(this, "Something went wrong, please try again later", Toast.LENGTH_SHORT).show();

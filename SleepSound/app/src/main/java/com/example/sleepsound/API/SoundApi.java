@@ -11,7 +11,7 @@ import retrofit2.http.GET;
 
 
 public interface SoundApi {
-    @GET("ios/sleep_music.json")
+    @GET("ios/sleep_sounds.json")
     Call<List<Sound>> getSounds();
 
     @GET("ios/sleep_music.json")

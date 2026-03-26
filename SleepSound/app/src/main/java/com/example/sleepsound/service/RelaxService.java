@@ -53,15 +53,14 @@ public class RelaxService extends Service {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         for (MediaPlayer mediaPlayer : mediaPlayerMap.values()) {
             if (mediaPlayer != null) {
                 mediaPlayer.stop();
                 mediaPlayer.release();
             }
         }
-        mediaPlayerMap.clear(); // Xóa toàn bộ Map
-        stopSelf();
+        mediaPlayerMap.clear();
+        super.onDestroy();
     }
 
     private void playSound(int resId){

@@ -14,7 +14,6 @@ import android.widget.Toast;
 
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
 import com.example.sleepsound.R;
 import com.example.sleepsound.model.Sound;
@@ -23,17 +22,16 @@ import com.example.sleepsound.shared_preferences.MySharedPreferences;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.Closeable;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AmbienceFragmentViewModel extends ViewModel {
+public class AmbienceFragmentViewModel extends AndroidViewModel {
     private List<Sound> sounds;
     private List<Sound> playingSounds;
 
@@ -45,7 +43,8 @@ public class AmbienceFragmentViewModel extends ViewModel {
 
     private MySharedPreferences mySharedPreferences;
 
-    public AmbienceFragmentViewModel() {
+    public AmbienceFragmentViewModel(Application application) {
+        super(application);
         sounds = new ArrayList<>();
         playingSounds = new ArrayList<>();
         this.liveSoundList = new MutableLiveData<>();
@@ -59,27 +58,28 @@ public class AmbienceFragmentViewModel extends ViewModel {
 
     @SuppressLint("DefaultLocale")
     public void updateFormattedStopTime() {
-        // Lấy giá trị từ SharedPreferences hoặc mặc định là 0
+        if (mySharedPreferences == null) {
+            formattedStopTime.setValue("00:00:00");
+            return;
+        }
         int hour = mySharedPreferences.getIntValue("hourStopSound", 0);
         int minute = mySharedPreferences.getIntValue("minuteStopSound", 0);
         int second = mySharedPreferences.getIntValue("secondStopSound", 0);
-
-        // Định dạng thời gian
         String formatted = String.format("%02d:%02d:%02d", hour, minute, second);
-
-        // Cập nhật giá trị
         formattedStopTime.setValue(formatted);
     }
 
 
     private void loadSounds() {
         Gson gson = new Gson();
-        Type listType = new TypeToken<List<Sound>>() {
-        }.getType();
-        try (InputStreamReader reader = new InputStreamReader(getClass().getClassLoader().getResourceAsStream("assets/sounds.json"))) {
+        Type listType = new TypeToken<List<Sound>>() {}.getType();
+        try {
+            InputStream inputStream = getApplication().getAssets().open("sounds/sounds.json");
+            InputStreamReader reader = new InputStreamReader(inputStream);
             sounds = gson.fromJson(reader, listType);
+            reader.close();
             liveSoundList.setValue(sounds);
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.err.println(e);
         }
     }

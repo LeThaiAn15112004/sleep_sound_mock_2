@@ -3,6 +3,7 @@
     package="com.example.sleepsound">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -27,6 +28,7 @@
         <service android:name=".service.AmbienceService"
             android:enabled="true"
             android:exported="true"
+            android:foregroundServiceType="mediaPlayback"
             android:permission="android.permission.BIND_MEDIA_SESSION"/>
 
         <service android:name=".service.RelaxService"
